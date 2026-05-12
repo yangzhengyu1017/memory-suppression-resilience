@@ -37,7 +37,7 @@ tryCatch({
 })
 
 # ==============================================================================
-# PART 1: Clinical Competing Models (Without Covariates)
+# PART 1: Clinical Competing Models
 # Model A: CTQ (IV) -> TACQ (Mediator) -> Resi (DV)
 # Model B: CTQ (IV) -> Resi (Mediator) -> TACQ (DV)
 # ==============================================================================
@@ -51,8 +51,8 @@ for (med_var in competing_mediators) {
   dv_var <- ifelse(med_var == "TACQ", "Resi", "TACQ") 
   
   # Construct base linear models (Path a and Path b/c')
-  formula_M <- as.formula(paste(med_var, "~ CTQ"))
-  formula_Y <- as.formula(paste(dv_var, "~", med_var, "+ CTQ"))
+  formula_M <- as.formula(paste(med_var, "~ CTQ + Gender + Age"))
+  formula_Y <- as.formula(paste(dv_var, "~", med_var, "+ CTQ + Gender + Age"))
   
   model.M <- lm(formula_M, data = clinical_data)
   model.Y <- lm(formula_Y, data = clinical_data)
@@ -83,7 +83,7 @@ print(clinical_results %>% mutate_if(is.numeric, round, 4))
 
 
 # ==============================================================================
-# PART 2: Neurobehavioral Batch Mediation (With Covariates)
+# PART 2: Neurobehavioral Batch Mediation
 # Model: inhibitionRate (IV) -> Brain ROI (Mediator) -> CD_RISC_totalScore (DV)
 # Covariates: Age, Gender
 # ==============================================================================
@@ -101,11 +101,11 @@ neuro_results_list <- list()
 
 for (biomarker in roi_biomarkers) {
   
-  # Path a: IV -> Mediator (controlling for Age, Gender)
+  # Path a: IV -> Mediator 
   form_M <- as.formula(paste(biomarker, "~ inhibitionRate + Gender + Age"))
   model.M <- lm(form_M, data = neuro_clean)
   
-  # Path b & c': Mediator & IV -> DV (controlling for Age, Gender)
+  # Path b & c': Mediator & IV -> DV 
   form_Y <- as.formula(paste("CD_RISC_totalScore ~", biomarker, "+ inhibitionRate + Gender + Age"))
   model.Y <- lm(form_Y, data = neuro_clean)
   
